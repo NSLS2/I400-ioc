@@ -1,0 +1,393 @@
+#
+# StreamDevice protocol for general functions present in I400, IC101,I404 ....
+#
+# A full command from the host to the I400 comprises as many characters
+# as needed to form the message, terminated by a LF character.
+# The LF is required for the I400 to commence processing.
+#
+# The I400 generates a reply to every message from the host when it is
+# the listener. First the I400 echos the command as sent icluding the LF.
+# Following that the first character is ACK (0x6) when the command has
+# been successfully executed without error. Responses to commands with
+# a "?" will the have required data, terminated by CR, LF. If no data
+# is required nothing will be transmitted after the ACK. If the I400
+# generates an error then it transmits a BELL (0x7) instead of the ACK.
+#
+# Terminal mode has to be disabled
+### SYSTem:PASSword 12345
+### SYSTem:COMMunication:TERMinal 0
+###
+# Checksum in answers is not implemented/checked now and should be disabled as well.
+### SYSTem:PASSword 12345
+### SYSTem:COMMunication:CHECKsum 0
+
+InTerminator = CR LF;
+OutTerminator = LF;
+replytimeout = 500;
+readtimeout  = 900;
+locktimeout = 6000;
+
+#ExtraInput = Error;
+#ExtraInput = Ignore;
+#
+@mismatch {
+	in "%*c";	
+}
+
+#@init {
+#	out "SYSTem:PASSword 12345";
+#	#in LF ACK;
+#	out "SYSTem:COMMunication:TERMinal 0";
+#	#in LF ACK;
+#	#out "SYSTem:COMMunication:CHECKsum 0";
+#	#in LF ACK;
+#}
+
+
+execString { 
+##* exec command can have formats:
+## exec "dbpr %(NAME)s,%i > %(NAME)s.txt";
+
+		#exec "\$1";
+		exec "%s";
+		#exec "var streamDebug 1";
+		#exec "exit";
+		#exec "dbl";
+}
+
+
+
+
+
+
+# State commands
+#
+# Save current state in EEPROM
+save {	
+	out "*SAV";
+	in "*SAV\10%*c";
+}
+
+###get *IDN? string
+#*idn?<\n>
+#PYRTECHCO,I400-REV4,0000001703,4.0F/1.5.6<\r><\n>
+#PYRTECHCO,I101-REV0,0000002248,4.0J/15.0.1
+#PYRTECHCO,I404-REV0,0000001092,4.1Q/14.0.22
+
+idn {	
+	InTerminator = CR LF;
+	
+	out "*IDN?";
+	in "*IDN?",LF,"%s";
+#	@mismatch {
+#		in "%*c";	
+#	}
+}
+
+###get terminal mode (send extra OK = 0)
+## Enter terminal mode (password protected), 0 = off, 1 = on
+## In terminal mode, ACK and NACK are not sent, and “OK” or error response is
+## sent for all valid commands that do not otherwise generate a response.
+
+#out
+#SYSTem:COMMunication:TERMinal?<\n>
+#in
+#SYSTem:COMMunication:TERMinal?<\n>1<\r><\n>
+
+#or set to 0
+#syst:comm:term?<\n>
+#<6>0<\r><\n>
+getTerminalMode {	
+	InTerminator = CR LF;
+	out "SYSTem:COMMunication:TERMinal?";
+	in "SYSTem:COMMunication:TERMinal?\n\x06%s";
+}
+
+setTerminalMode {	
+	InTerminator = LF ACK;
+	out "SYSTem:COMMunication:TERMinal %{0|1}";
+	in "SYSTem:COMMunication:TERMinal?\n%u";
+}
+
+
+getChecksumMode {	
+	InTerminator = CR LF;
+	out "SYSTem:COMMunication:CHECKsum?";
+	in "SYSTem:COMMunication:CHECKsum?\n\x06%s";
+}
+
+setChecksumMode {	
+	InTerminator = CR LF;
+	out "SYSTem:COMMunication:CHECKsum %{0|1}";
+	in "SYSTem:COMMunication:CHECKsum?\n\x06%s";
+}
+
+
+getDeviceAddress {	
+	
+	###insert @missmatch here to disable checksum and terminal mode
+  ##	@mismatch {
+  ##		OUT "SYSTem:PASSword 12345\nSYSTem:COMMunication:CHECKsum 0\nSYSTem:COMMunication:TERMinal 0";
+  ##		}
+	InTerminator = CR LF;
+	out "#?";
+	in "#?"LF,ACK,"%c";
+}
+
+
+# Recall state from EEPROM
+recall {out "*RCL"; in "*RCL\10%*c";}
+
+# Return I400 to default conditions
+reset {
+	out "*RST";
+	in "*RST\10%*c";
+}
+
+# Clear I400 event registers and error queue
+clear {
+	InTerminator = LF ACK;
+
+	out "*CLS";
+	in "*CLS";
+	}
+
+#
+# Initiate readings on valid trigger
+#
+init {out "INIT"; in "INIT\10%*c";}
+#
+# I400 Calibration
+#
+# Initiate calibration
+doCalib {
+	InTerminator = LF ACK;
+
+	out "CALIBration:GAIn"; 
+	in "CALIBration:GAIn";
+}
+
+#### in: CALIBration:GAIn?<0a><06>15,1.1880e+00,1.2" where "<0a>" was expected
+getCalib {
+	out "CALIBration:GAIn?"; 
+	in "CALIBration:GAIn?\n\x06%s";
+}
+
+
+#reset stored gains to nominal
+clearCalib {
+	out "CALIBration:GAIn CLEar"; 
+	in "CALIBration:GAIn CLEar\n\x06%s";
+}
+
+
+#enable internal calib source 
+testCalib {
+	InTerminator = LF ACK;
+
+	#InTerminator = "" ; there is no Termination except ACK or BEL
+	out "CALIBration:SOURce %d"; 
+	#in "CALIBration:SOURce %d\n%(\$1:\$2.VAL)c %";
+	in "CALIBration:SOURce %d";
+}
+
+
+
+# Save calibration
+saveCalib {
+	out "CALIBration:SAV";
+	in "CALIBration:SAV\n%c";
+}
+
+# Recall calibration (needed after reset)
+recallCalib { 
+	out "CALIBration:RCL";
+	in "CALIBration:RCL\n%c";
+}
+#
+# Set/Query capacitor, by default 0 = 10pF and 1 = 1000pF
+#
+setCap {
+	InTerminator = LF ACK;
+
+	out "CONFigure:CAPacitor %{0|1}"; 
+	#in "CONFigure:CAPacitor %*d\n\x06";
+	in "CONFigure:CAPacitor %*d";
+}
+
+##receive capcitance value e.g. "0,1.0000e-10 F" cap#0 (small one) and its value)
+getCap {
+	out "CONFigure:CAPacitor?"; 
+	in "CONFigure:CAPacitor?\n\x06%d,%(\$1.VAL)e F"; 
+}
+
+
+# Send/Query password
+#inputBuffer="SYSTem:PASSword 12345<0a><06>",
+sendPassword {
+	InTerminator = LF ACK;
+	out "SYSTem:PASSword %s";
+	in "SYSTem:PASSword %*s";
+}
+
+# Query password protection 
+#if enabled <PASSWORD> is response otherwise "0"
+getPassword {
+	out "SYSTem:PASSword?"; 
+	in "SYSTem:PASSword?\n%*c%s"; 
+}
+
+#It is recommended that you set all the enable registers to all 1’s.
+#The host software should use the *STB? command to watch for changes to the status of the I400,
+#and then *ESR?, :STATus:OPERation:CONDition? or :STATus:QUESTionable:CONDition?
+#as appropriate to recover the details from the relevant register.
+
+##UKNW
+##UKNW
+##EAV = Error Available
+##QSB = Questionable Summary Bit
+##MAV = Message Available
+##ESB = Event Summary Bit
+##RQS = Request for Service
+##OSB = Operation Summary Bit
+getStatusByte {
+	out "*STB?"; 
+	in "*STB?\n\x06%u"; 
+}
+
+###
+##Operation Complete
+##Query Error
+##Device Dependent Error
+##Execution Error
+##Command Error
+##User Request
+##Power On
+getEventStatusRegister {
+	OUT "*ESR?"; 
+	in "*ESR?\n\x06%u"; 
+}
+
+getEventStatusEnRegister {
+	OUT "*ESE?"; 
+	in "*ESE?\n\x06%u"; 
+}
+
+##Calibrating
+##na
+##Ranging
+##na
+##Measuring
+##Waiting for Trigger
+##na
+##na
+##Saving to EEPROM
+##na
+##na
+##na
+##na
+##na
+##Program running
+##na
+getStatusOperCond {
+	out "STATus:OPERation:CONDition?"; 
+	in "STATus:OPERation:CONDition?\n\x06%u"; 
+}
+
+##Voltage
+##Current
+##Time
+##Power
+##Temperature
+##na
+##na
+##na
+##Calibration
+##na
+##na
+##na
+##na
+##na
+##na
+##not used
+getStatusQuestCond {
+	out "STATus:QUESTionable:CONDition?"; 
+	in "STATus:QUESTionable:CONDition?\n\x06%u"; 
+}
+
+
+# Get Error Message, returns a quoted string.
+#
+#SYST:ERR?<\n>
+#-113,"Undefined header"<\r><\n>
+#SYST:ERR?<\n>
+#0,"No error"<\r><\n>
+getErr {
+	InTerminator = CR LF;
+	out "SYSTem:ERRor?"; 
+	in "SYSTem:ERRor?\n\x06%*d,\34%[^,\34]\34"; 
+}
+
+#Read digitals (bit0-2 = reserved, bit3 = HV enabled, bit4 = external gate present)
+#Read digitals
+#bit0 = measuring
+#bit1 = waiting trigger
+#bit2 = calibrated
+#bit3 = HV enabled
+#bit4 = external gate present
+
+#output buffer="READ:DIGital?<0a>"
+#inputBuffer="READ:DIGital?<0a>7<0d><0a>
+readDigital {
+	InTerminator = CR LF;
+
+	OUT "READ:DIGital?";
+	in "READ:DIGital?\n\x06%u";
+}
+
+#no FETCH in IC101!!!
+fetchDigital {
+	OUT "FETCh:DIGital?";
+	in "FETCh:DIGital?\n\x06%b";
+}
+
+#get dominant noise frequency (generally line frequency, 50 or 60 Hz) set needs password
+getFilterfreq {
+	OUT "SYSTem:FREQuency?";
+	in "SYSTem:FREQuency?\n\x06%s";   #%u
+}
+
+setFilterfreq {  
+	InTerminator = LF ACK;
+	extrainput = error;
+
+	@mismatch {
+		IN "SYSTem:FREQuency %(\$1:\$2.VAL)39c";
+	}
+
+
+	@replytimeout {
+		IN "SYSTem%(\$1:\$2)39c";
+	}
+
+
+	#Timeout after reading 21 bytes "...YSTem:FREQuency 50<0a><07>"
+	@readtimeout {
+		IN "SYSTem%(\$1:\$2)39c";
+	}
+
+
+	
+	OUT "SYSTem:FREQuency %s"; #%u
+	IN "SYSTem:FREQuency %s";  #%u
+	#IN "SYSTem%(\$1:\$2)39c";
+}
+
+#get dominant noise frequency (generally line frequency, 50 or 60 Hz) set needs password
+getSafestate {
+	OUT "SYSTem:SAFEstate?";
+	in "SYSTem:SAFEstate?\n\x06%u";
+}
+
+
+#EOF

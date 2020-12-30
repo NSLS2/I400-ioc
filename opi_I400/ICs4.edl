@@ -1,0 +1,238 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 93
+y 587
+w 520
+h 45
+font "helvetica-medium-r-18.0"
+ctlFont "helvetica-medium-r-18.0"
+btnFont "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 3
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 0
+ctlBgColor1 index 0
+ctlBgColor2 index 14
+topShadowColor index 0
+botShadowColor index 14
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 7
+y 12
+w 69
+h 14
+font "helvetica-medium-r-12.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "Last Values:"
+}
+autoSize
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 100
+y 30
+w 90
+h 0
+lineColor index 21
+fillColor index 0
+lineWidth 5
+numPoints 2
+xPoints {
+  0 100
+  1 190
+}
+yPoints {
+  0 30
+  1 30
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 195
+y 30
+w 90
+h 0
+lineColor index 26
+fillColor index 0
+lineWidth 5
+numPoints 2
+xPoints {
+  0 195
+  1 285
+}
+yPoints {
+  0 30
+  1 30
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 290
+y 30
+w 90
+h 0
+lineColor index 33
+fillColor index 0
+lineWidth 5
+numPoints 2
+xPoints {
+  0 290
+  1 380
+}
+yPoints {
+  0 30
+  1 30
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 385
+y 30
+w 90
+h 0
+lineColor index 37
+fillColor index 0
+lineWidth 5
+numPoints 2
+xPoints {
+  0 385
+  1 475
+}
+yPoints {
+  0 30
+  1 30
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 5
+release 0
+x 100
+y 5
+w 90
+h 20
+controlPv "CALC\\\{A*B\}($(P)$(R)$(PLOTVAR1), LOC\\$(P)$(R)_iScaleFactor)"
+format "exponential"
+font "helvetica-bold-r-14.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 10
+limitsFromDb
+nullColor index 0
+useHexPrefix
+showUnits
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 5
+release 0
+x 195
+y 5
+w 90
+h 20
+controlPv "CALC\\\{A*B\}($(P)$(R)$(PLOTVAR2), LOC\\$(P)$(R)_iScaleFactor)"
+format "exponential"
+font "helvetica-bold-r-14.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 10
+limitsFromDb
+nullColor index 0
+useHexPrefix
+showUnits
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 5
+release 0
+x 290
+y 5
+w 90
+h 20
+controlPv "CALC\\\{A*B\}($(P)$(R)$(PLOTVAR3), LOC\\$(P)$(R)_iScaleFactor)"
+format "exponential"
+font "helvetica-bold-r-14.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 10
+limitsFromDb
+nullColor index 0
+useHexPrefix
+showUnits
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 5
+release 0
+x 385
+y 5
+w 90
+h 20
+controlPv "CALC\\\{A*B\}($(P)$(R)$(PLOTVAR4), LOC\\$(P)$(R)_iScaleFactor)"
+format "exponential"
+font "helvetica-bold-r-14.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 10
+limitsFromDb
+nullColor index 0
+useHexPrefix
+showUnits
+newPos
+objType "monitors"
+endObjectProperties
+

@@ -1,0 +1,158 @@
+#
+# StreamDevice protocol for the IC101.
+#
+# A full command from the host to the I400 comprises as many characters
+# as needed to form the message, terminated by a LF character.
+# The LF is required for the I400 to commence processing.
+#
+# The I400 generates a reply to every message from the host when it is
+# the listener. First the I400 echos the command as sent icluding the LF.
+# Following that the first character is ACK (0x6) when the command has
+# been successfully executed without error. Responses to commands with
+# a "?" will the have required data, terminated by CR, LF. If no data
+# is required nothing will be transmitted after the ACK. If the I400
+# generates an error then it transmits a BELL (0x7) instead of the ACK.
+#
+# Terminal mode has to be disabled
+### SYSTem:PASSword 12345
+### SYSTem:COMMunication:TERMinal 0
+###
+# Checksum in answers is not implemented/checked now and should be disabled as well.
+### SYSTem:PASSword 12345
+### SYSTem:COMMunication:CHECKsum 0
+
+InTerminator = CR LF;
+OutTerminator = LF;
+replytimeout = 500;
+readtimeout  = 1000;
+locktimeout = 60000;
+#
+
+
+
+# Set/Query Maximum *External* High Voltage in Volts (Password Protected? -nope but actual HV has to be 0)
+# hint: no internal present on IC101
+setHVMax {
+	InTerminator = LF ACK;
+
+	out "CONFigure:HIVOltage:MAXvalue %d"; 
+	in "CONFigure:HIVOltage:MAXvalue %d";
+}
+
+getHVMax {
+	InTerminator = CR LF;
+	out "CONFigure:HIVOltage:MAXvalue?";
+	in "CONFigure:HIVOltage:MAXvalue?\n\x06%d";
+}
+
+# Set/Query External High Voltage in Volts
+setHV {
+	InTerminator = LF ACK;
+	out "CONFigure:HIVOltage:SET %d"; 
+	in "CONFigure:HIVOltage:SET %d";
+}
+
+# Don't use InTerminator on GetHV, causes failure during init handler for checkHV
+getHV {
+	out "CONFigure:HIVOltage:SET?"; 
+	in "CONFigure:HIVOltage:SET?\n\x06%d";
+}
+
+##CONF:HIVO:SET 0<0a><06>
+checkHV {
+	out "CONF:HIVO:SET %d"; 
+	in "CONF:HIVO:SET %*d\n%{\x07|\x06}"; 
+	@init { 
+		getHV; 
+	}
+}
+
+checkHVR {out "CONF:HIVO:SET?";
+ in "CONF:HIVO:SET?\n%{\7|\6}";
+ ExtraInput = IGNORE;}
+
+
+
+
+# Query the last measured current data in amps.
+#read:curr?<\n>
+#OK<\r><\n>
+#1.0000e-04 S,-7.5463e-11 A,-2.9669e-10 A,-1.0994e-10 A,-3.7466e-11 A,0<\r><\n>
+#
+#streamdebug
+#input line: "READ:CURR?<0a>OK<0d><0a>1.0000e-04 S,3.7732e-11 A,-2.9669e-10 A,3.6647e-11 A,1.4986e-10 A,0<0d><0a>"
+
+readCurrents {
+	replytimeout = 100;
+	readtimeout  = 65001;  #echos command and waits for values
+	locktimeout = 65005;
+
+
+	InTerminator = CR LF;
+	out "READ:CURRent?";
+ 	##I100 $1=Dev $2=time $3=OVR 
+ 	in "READ:CURRent?\n\x06%(\$1:\$2.VAL)e %(\$1:\$2.EGU)c,%e %(EGU)c,%(\$1:\$3.VAL)i";
+}
+
+###no fetch on IC101....
+
+##6.5000e+01 S,9.3882e-10 C,1
+readCharges {
+	InTerminator = CR LF;
+	out "READ:CHArge?";
+ 	##I100 $1=Dev $2=time $3=OVR 
+ 	in "READ:CHArge?\n\x06%(\$1:\$2.VAL)e %(\$1:\$2.EGU)c,%e %(EGU)c,%(\$1:\$3.VAL)i";
+}
+
+###no fetch on IC101....
+
+# Send/Query password
+#
+sendPassword {
+	out "SYSTem:PASSword %s";
+	in "SYSTem:PASSword %*s\n%*c";
+}
+
+# Query password protection 
+#if enabled <PASSWORD> is response otherwise "0"
+getPass {
+	InTerminator = CR LF;
+	out "SYSTem:PASSword?"; 
+	in "SYSTem:PASSword?\n%*c%s"; 
+}
+
+#
+# Set/Query current Range
+#
+setRange {
+	InTerminator = LF ACK;
+
+	out "CONFigure:RANGe %e"; 
+	in "CONFigure:RANGe %e";
+##needs something that handels the NACK case in "CONFigure:RANGe %e\n\x07";
+
+}
+
+###1.0000e-06 A
+getRange {
+	out "CONFigure:RANGe?";
+	in "CONFigure:RANGe?\n\x06%e %(EGU)c";
+}
+
+# Set/Query current Range
+#
+setPeriod {
+	InTerminator = LF ACK;
+	out "CONFigure:PERiod %e"; 
+	in "CONFigure:PERiod %e";
+##needs something that handels the NACK case in "CONFigure:RANGe %e\n\x07";
+
+}
+
+getPeriod {
+	out "CONFigure:PERiod?";
+	in "CONFigure:PERiod?\n\x06%e %(EGU)c";
+}
+
+
+#EOF

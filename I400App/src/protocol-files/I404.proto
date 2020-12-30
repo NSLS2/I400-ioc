@@ -1,0 +1,195 @@
+#
+# StreamDevice protocol for the I400.
+#
+# A full command from the host to the I400 comprises as many characters
+# as needed to form the message, terminated by a LF character.
+# The LF is required for the I400 to commence processing.
+#
+# The I400 generates a reply to every message from the host when it is
+# the listener. First the I400 echos the command as sent icluding the LF.
+# Following that the first character is ACK (0x6) when the command has
+# been successfully executed without error. Responses to commands with
+# a "?" will the have required data, terminated by CR, LF. If no data
+# is required nothing will be transmitted after the ACK. If the I400
+# generates an error then it transmits a BELL (0x7) instead of the ACK.
+#
+# Terminal mode has to be disabled
+### SYSTem:PASSword 12345
+### SYSTem:COMMunication:TERMinal 0
+###
+# Checksum in answers is not implemented/checked now and should be disabled as well.
+### SYSTem:PASSword 12345
+### SYSTem:COMMunication:CHECKsum 0
+
+InTerminator = CR LF;
+OutTerminator = LF;
+replytimeout = 499;
+readtimeout  = 900;
+locktimeout = 5000;
+
+	@mismatch {
+		in "%*c";	
+	}
+
+
+ # Read monitor voltage input ADC
+ #The monitor port also provides an uncommitted 0 to +5 VDC analog input that is read with 10
+ #bit resolution, and which you may use for any monitoring purpose.
+ 
+getADC {
+	OUT "READ:MONitor?";
+	in "READ:MONitor?\n\x06%f V";
+}
+
+
+ # Read pressure input ADC
+ #If you select the -TP option with your I400, the unit is supplied with a B57703 thermistor probe,
+ #which you should attach securely to the ionization chamber, and an internal barometer that
+ #monitors the atmospheric pressure in the range 600 to 1100 mbar.
+getPressure {
+	OUT "READ:PRESsure?";
+	in "READ:PRESsure?\n\x06%f";
+}
+
+ # Read temperature input ADC
+getTemperature {
+	OUT "READ:TEMPerature?";
+	in "READ:TEMPerature?\n\x06%f CEL";
+}
+
+
+#################HV section##################################################################################################################
+
+
+
+# Set/Query Maximum *Signal* High Voltage in Volts (Password Protected)
+#
+checkHV {
+	InTerminator = ;
+	out "CONFigure:HIVOltage:SIGnal:VOLT %d"; 
+	in "CONFigure:HIVOltage:SIGnal:VOLT %*d\n%{\7|\6}"; 
+#	@init { 
+#		out "CONFigure:HIVOltage:SIGnal:VOLT?"; 
+#		in "CONFigure:HIVOltage:SIGnal:VOLT?\n\x06%d";
+#	}
+}
+
+checkHVR {
+	InTerminator = ;
+	out "CONFigure:HIVOltage:SET?";
+	in "CONFigure:HIVOltage:SET?\n%{\x07|\x06}";
+ 	ExtraInput = IGNORE;
+}
+
+
+#####pass needed here
+setHVMax {
+	InTerminator = ;
+	out "CONFigure:HIVOltage:MAXvalue %d"; 
+	in "CONFigure:HIVOltage:MAXvalue %d\n" ACK;
+}
+
+getHVMax {
+	InTerminator = CR LF;
+	out "CONFigure:HIVOltage:MAXvalue?";
+	in "CONFigure:HIVOltage:MAXvalue?\n\x06%d";
+}
+
+# Set/Query External High Voltage in Volts
+setHV {
+	#InTerminator = CR LF; ###check if crlf is here actually
+	InTerminator = LF ACK;
+	out "CONFigure:HIVOltage:SET %d"; 
+	in  "CONFigure:HIVOltage:SET %d";
+	#@missmatch  {
+		##Timeout after reading 35 bytes "...tage:SIGnal:VOLT 5<0a><07>"
+		#in "CONFigure:HIVOltage:SIGnal:VOLT %*d\n%(/$1/$2)d";
+	#}
+}
+
+# Don't use InTerminator on GetHV, causes failure during init handler for checkHV
+getHV {
+	out "CONFigure:HIVOltage:SET?"; 
+	in "CONFigure:HIVOltage:SET?\n\x06%d";
+}
+
+
+##########current measurement section##########################################################################################
+
+
+# Query the last measured current data in amps.
+#read:curr?<\n>
+#OK<\r><\n>
+#1.0000e-04 S,-7.5463e-11 A,-2.9669e-10 A,-1.0994e-10 A,-3.7466e-11 A,0<\r><\n>
+#
+#streamdebug
+#input line: "READ:CURR?<0a>OK<0d><0a>1.0000e-04 S,3.7732e-11 A,-2.9669e-10 A,3.6647e-11 A,1.4986e-10 A,0<0d><0a>"
+
+readCurrents {
+	replytimeout = 100;
+	readtimeout  = 65001;  #echos command and waits for values
+	locktimeout = 65005;
+
+	InTerminator = CR LF;
+	out "READ:CURRent?";
+
+ 	#I400 $1=Dev $2=time $3=OVR $4=Current-2,$5=Current-3...currents
+ 	#in "READ:CURRent?\n\x06%(\$1:\$2.VAL)e %(\$1:\$2.EGU)c,%e %(EGU)c,%(\$1:\$4.VAL)e %(\$1:\$4.EGU)c,%(\$1:\$5.VAL)e %(\$1:\$5.EGU)c,%(\$1:\$6.VAL)e %(\$1:\$6.EGU)c,%(\$1:\$3.VAL)i";
+	in "READ:CURRent?\n\x06%(\$1:\$2.VAL)e %(\$1:\$2.EGU)c,%e %(EGU)c,%(\$1:I2_MON.VAL)e %(\$1:I2_MON.EGU)c,%(\$1:I3_MON.VAL)e %(\$1:I3_MON.EGU)c,%(\$1:I4_MON.VAL)e %(\$1:I4_MON.EGU)c,%(\$1:\$3.VAL)i";
+
+}
+#
+# Read current data as a waveform of bytes, this contains 6 numbers,
+# integration time, curr1, curr2, curr3, curr4, status
+readCurr {
+	InTerminator = CR LF;
+	out "FETCH:CURR?";
+	in "FETCH:CURR?\10\6%c";
+}
+
+
+#
+# Set/Query current Range
+#
+setRange {
+	InTerminator = LF ACK;
+	out "CONFigure:RANGE %e"; 
+	in "CONFigure:RANGE %e";
+}
+
+###1.0000e-06 A
+getRange {
+	replytimeout = 500;
+	InTerminator = CR LF;
+	#out "CONF:GATE:INT:RANGE?";
+	out "CONFigure:RANGE?";
+	#in "CONF:GATE:INT:RANGE?\n\x06%e %(EGU)c,1";   # ',1'  are subsamples default is 1
+	in "CONFigure:RANGE?\n\x06%e %(EGU)c,1";   # ',1'  are subsamples default is 1
+}
+
+
+# Set/Query current Range
+#
+setPeriod {
+	InTerminator = LF ACK;
+	out "CONFigure:PERiod %e"; #out "CONFigure:GATe:INTernal:PERiod %e";
+	in "CONFigure:PERiod %e"; #in "CONFigure:GATe:INTernal:PERiod %e";
+##needs something that handels the NACK case in "CONFigure:RANGe %e\n\x07";
+
+}
+
+getPeriod {
+	#InTerminator = CR LF;
+	out "CONFigure:PERiod?";  #out "CONFigure:GATe:INTernal:PERiod?";
+	in "CONFigure:PERiod?\n\x06%e %(EGU)c,1";   # ',1'  are subsamples default is 1
+	 #in "CONFigure:GATe:INTernal:PERiod?\n\x06%e %(EGU)c,1; # ',1'  are subsamples default is 1
+}
+
+
+FetchPosition {
+	#InTerminator = CR LF;
+	out "FETCh:POSition?";  
+	in "FETCh:POSition?\n\x06%(A)e,%(B)e";
+}
+
+

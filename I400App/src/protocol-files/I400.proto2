@@ -1,0 +1,177 @@
+#
+# StreamDevice protocol for the I400.
+# vi: sw=4 ts=4
+#
+# Version FMB Oxford V1.01  **
+#
+# A full command from the host to the I400 comprises as many characters
+# as needed to form the message, terminated by a LF character.
+# The LF is required for the I400 to commence processing.
+#
+# The I400 generates a reply to every message from the host when it is
+# the listener. First the I400 echos the command as sent icluding the LF.
+# Following that the first character is ACK (0x6) when the command has
+# been successfully executed without error. Responses to commands with
+# a "?" will the have required data, terminated by CR, LF. If no data
+# is required nothing will be transmitted after the ACK. If the I400
+# generates an error then it transmits a BELL (0x7) instead of the ACK.
+#
+# ** Modified by KL 8/2014 to work with i400 version 1.5.06/4.0F
+#    Terminator set to crlf
+#    Single character acknowledgement (%*c) is now the string 'OK'
+#    Fixed getErr
+#    HVERR record gets hardware missing error (getHV/setHV untested)
+#    and some database modifications as well
+
+InTerminator = CR LF;
+OutTerminator = LF;
+replytimeout = 1000;
+readtimeout  = 500;
+locktimeout = 1000;
+#
+# State commands
+#
+# Save current state in EEPROM
+save {out "*SAV"; in "*SAV\10OK";}
+# Recall state from EEPROM
+recall {out "*RCL"; in "*RCL\10OK";}
+# Return I400 to default conditions
+reset {out "*RST"; in "*RST\10OK";}
+# Clear I400 event registers and error queue
+clear {out "*CLS"; in "*CLS\10OK";}
+#
+# Initiate readings on valid trigger
+#
+init {out "INIT"; in "INIT\10OK";}
+#
+# I400 Calibration
+#
+# Initiate calibration
+doCalib {
+    out "CALIB:GAI"; 
+    in  "CALIB:GAI\10OK";
+}
+
+# Save calibration
+saveCalib {
+    out "CALIB:SAV"; 
+    in  "CALIB:SAV\10OK";
+}
+
+# Recall calibration (needed after reset)
+recallCalib { 
+    out "CALIB:RCL";
+    in  "CALIB:RCL\10OK";
+}
+
+#
+# Set/Query capacitor, by default 0 = 10pF and 1 = 1000pF
+#
+setCap {
+    out "CONF:CAP %{0|1}";
+    in  "CONF:CAP %d\10OK";
+}
+
+getCap {
+    out "CONF:CAP?";
+    in  "CONF:CAP?\10%d,%(\$2.VAL)e F";
+}
+#
+# Set/Query Maximum External High Voltage in Volts (Password Protected)
+#
+setHVM {
+    @mismatch { 
+        in "CONF:HIVO:EXT:MAX %*d\10%*d,\34%(\$1:HVERR)[^,\34]\34"; 
+    }
+    out "CONF:HIVO:EXT:MAX %d";
+    in  "CONF:HIVO:EXT:MAX %d\10OK";
+}
+
+getHVM {
+    @mismatch { 
+        in "CONF:HIVO:EXT:MAX?\10%*d,\34%(\$1:HVERR)[^,\34]\34"; 
+    }
+    out "CONF:HIVO:EXT:MAX?";
+    in  "CONF:HIVO:EXT:MAX?\10%d"; 
+}
+#
+# Set/Query External High Voltage in Volts
+#
+setHV {
+    @mismatch { 
+        in "CONF:HIVO:EXT:VOLT %*d\10%*d,\34%(\$1:HVERR)[^,\34]\34"; 
+    }
+    out "CONF:HIVO:EXT:VOLT %d";
+    in  "CONF:HIVO:EXT:VOLT %d\10OK";
+}
+getHV {
+    out "CONF:HIVO:EXT:VOLT?";
+    in  "CONF:HIVO:EXT:VOLT?\10%d"; 
+}
+
+checkHV {
+    @init { getHV; }
+    @mismatch { 
+        in "CONF:HIVO:EXT:VOLT %*d\10%*d,\34%(\$1:HVERR)[^,\34]\34"; 
+    }
+    out "CONF:HIVO:EXT:VOLT %d"; 
+    in "CONF:HIVO:EXT:VOLT %*d\10%{\7|\6}"; 
+}
+
+checkHVR {
+    @mismatch { 
+        in "CONF:HIVO:EXT:VOLT?\10%*d,\34%(\$1:HVERR)[^,\34]\34"; 
+    }
+
+    out "CONF:HIVO:EXT:VOLT?";
+    in  "CONF:HIVO:EXT:VOLT?\10%{\7|\6}";
+    ExtraInput = IGNORE;
+}
+
+#
+# Query the last measured current data in amps.
+#
+getCs {
+    out "READ:CURR?"; 
+    in  "READ:CURR?\10OK";
+    in "%*c%*e S,%e A,%(\$1:\$2.VAL)e A,%(\$1:\$3.VAL)e A,%(\$1:\$4.VAL)e A,%*d";
+}
+#
+# Read current data as a waveform of bytes, this contains 6 numbers,
+# integration time, curr1, curr2, curr3, curr4, status
+#
+readCurr {
+    out "FETCH:CURR?";
+    in  "FETCH:CURR?\10\6%c"; 
+}
+
+#
+# Set/Query password
+#
+setPass {
+    out "SYST:PASS %s";
+    in  "SYST:PASS %*s\10OK";
+}
+
+getPass {
+    out "SYST:PASS?";
+    in  "SYST:PASS?\10OK%s"; 
+}
+#
+# Set/Query current Range
+#
+setRange {
+    out "CONF:GATE:INT:RANGE %e";
+    in  "CONF:GATE:INT:RANGE %e\10OK";
+}
+getRange {
+    out "CONF:GATE:INT:RANGE?";
+    in "CONF:GATE:INT:RANGE?\10%e A,%*d"; 
+}
+#
+# Get Error Message, returns a quoted string.
+#
+getErr {
+    out "SYST:ERR?";
+    in  "SYST:ERR?\10%*d,\34%[^,\34]\34"; 
+}
