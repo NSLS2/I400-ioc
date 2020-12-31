@@ -14,6 +14,12 @@ DBD += ${PROD_IOC}.dbd
 
 # I400.dbd will be made up from these files:
 ${PROD_IOC}_DBD += base.dbd
+# BEGIN ANSIBLE MANAGED BLOCK
+ifneq ($(RECCASTER),)
+I400_DBD += reccaster.dbd
+I400_LIBS += reccaster
+endif
+# END ANSIBLE MANAGED BLOCK
 
 ${PROD_IOC}_DBD += stream.dbd
 ${PROD_IOC}_DBD += asyn.dbd

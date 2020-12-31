@@ -49,6 +49,7 @@ dbLoadTemplate("./db/I400.substitutions")
 ## Run this to trace the stages of iocInit
 #traceIocInit
 
+dbLoadRecords("/epics/iocs/I400/db/reccaster.db", "P=XF:07ID-CT{IOC:I400}RecSync")
 iocInit()
 
 ## Start any sequence programs

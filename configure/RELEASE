@@ -29,6 +29,10 @@ MODBUS=/usr/lib/epics
 UIOCSYSTEM=/opt/epics/modules/uIOCSystem
 
 # EPICS_BASE usually appears last so other apps can override stuff:
+# BEGIN ANSIBLE MANAGED BLOCK
+# RecSync support
+RECCASTER=$(EPICS_BASE)
+# END ANSIBLE MANAGED BLOCK
 EPICS_BASE=/usr/lib/epics
 
 # Set RULES here if you want to take build rules from somewhere

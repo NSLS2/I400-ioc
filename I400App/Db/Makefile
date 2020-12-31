@@ -13,6 +13,11 @@ include $(TOP)/configure/CONFIG
 #DB += xxx.db
 DB += I400.substitutions
 DB += I400.template
+# BEGIN ANSIBLE MANAGED BLOCK
+ifneq ($(RECCASTER),)
+DB_INSTALLS += $(RECCASTER)/db/reccaster.db
+endif
+# END ANSIBLE MANAGED BLOCK
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
