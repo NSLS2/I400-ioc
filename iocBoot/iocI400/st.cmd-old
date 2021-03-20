@@ -3,10 +3,9 @@
 ## You may have to change I400 to something else
 ## everywhere it appears in this file
 
-epicsEnvSet("EPICS_CA_AUTO_ADDR_LIST", "NO")
-epicsEnvSet("EPICS_CA_ADDR_LIST", "10.6.128.255")
 
 < envPaths
+< /epics/common/xf07id-ioc1-netsetup.cmd
 
 cd ${TOP}
 
@@ -26,7 +25,7 @@ I400_registerRecordDeviceDriver(pdbbase)
 #asynOctetSetOutputEos "COM1",0,"\r\n"
 #asynSetOption ("COM1", 0, "baud", "115200")
 #asynSetOption ("COM1", 0, "bits", "8")
-#asynSetOption ("COM1", 0, "parity", "none")
+#asynSetOption ("COM1", 0, "parity", "xf07id-cagw-713.nsls2.bnl.local")
 #asynSetOption ("COM1", 0, "stop", "1")
 #asynSetOption ("COM1", 0, "clocal", "Y")
 #asynSetOption ("COM1", 0, "crtscts", "N")
@@ -35,12 +34,12 @@ I400_registerRecordDeviceDriver(pdbbase)
 ##############  I404 via Moxa TCP Server  #########
 ##
 ## drvAsynIPPortConfigure(portName, hostInfo, priority, noAutoConnect, noProcessEos)
-drvAsynIPPortConfigure("I400_1", "10.7.2.52:4001",0,0,0)
-drvAsynIPPortConfigure("I400_2", "10.7.2.54:4001",0,0,0)
-drvAsynIPPortConfigure("I400_3", "10.7.2.55:4002",0,0,0)
-drvAsynIPPortConfigure("I400_4", "10.7.2.56:4002",0,0,0)
-drvAsynIPPortConfigure("I400_5", "10.7.2.59:4001",0,0,0)
-drvAsynIPPortConfigure("I400_6", "10.7.2.60:4001",0,0,0)
+drvAsynIPPortConfigure("I400_1", "xf07id-tsrv2.nsls2.bnl.local:4001",0,0,0)
+drvAsynIPPortConfigure("I400_2", "xf07id-tsrv4.nsls2.bnl.local:4001",0,0,0)
+drvAsynIPPortConfigure("I400_3", "xf07id-tsrv5.nsls2.bnl.local:4002",0,0,0)
+drvAsynIPPortConfigure("I400_4", "xf07id-tsrv6.nsls2.bnl.local:4002",0,0,0)
+drvAsynIPPortConfigure("I400_5", "xf07id-tsrv8.nsls2.bnl.local:4001",0,0,0)
+drvAsynIPPortConfigure("I400_6", "xf07id-tsrv9.nsls2.bnl.local:4001",0,0,0)
 ##
 
 #asynSetTraceMask("I400_1",0,9)

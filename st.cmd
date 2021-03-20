@@ -3,10 +3,9 @@
 ## You may have to change I400 to something else
 ## everywhere it appears in this file
 
-epicsEnvSet("EPICS_CA_AUTO_ADDR_LIST", "NO")
-epicsEnvSet("EPICS_CA_ADDR_LIST", "10.6.128.255")
 
 < envPaths
+< /epics/common/xf07id-ioc1-netsetup.cmd
 
 cd ${TOP}
 
@@ -26,7 +25,7 @@ I400_registerRecordDeviceDriver(pdbbase)
 #asynOctetSetOutputEos "COM1",0,"\r\n"
 #asynSetOption ("COM1", 0, "baud", "115200")
 #asynSetOption ("COM1", 0, "bits", "8")
-#asynSetOption ("COM1", 0, "parity", "none")
+#asynSetOption ("COM1", 0, "parity", "xf07id-cagw-713.nsls2.bnl.local")
 #asynSetOption ("COM1", 0, "stop", "1")
 #asynSetOption ("COM1", 0, "clocal", "Y")
 #asynSetOption ("COM1", 0, "crtscts", "N")

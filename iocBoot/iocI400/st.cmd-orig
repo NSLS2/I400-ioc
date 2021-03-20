@@ -21,7 +21,7 @@ I400_registerRecordDeviceDriver(pdbbase)
 #asynOctetSetOutputEos "COM1",0,"\r\n"
 #asynSetOption ("COM1", 0, "baud", "115200")
 #asynSetOption ("COM1", 0, "bits", "8")
-#asynSetOption ("COM1", 0, "parity", "none")
+#asynSetOption ("COM1", 0, "parity", "xf07id-cagw-713.nsls2.bnl.local")
 #asynSetOption ("COM1", 0, "stop", "1")
 #asynSetOption ("COM1", 0, "clocal", "Y")
 #asynSetOption ("COM1", 0, "crtscts", "N")
@@ -44,6 +44,7 @@ dbLoadTemplate "./db/I400.substitutions"
 #traceIocInit
 
 dbLoadRecords("/epics/iocs/I400/db/reccaster.db", "P=XF:07ID-CT{IOC:I400}RecSync")
+< /epics/common/xf07id-ioc1-netsetup.cmd
 iocInit()
 
 ## Start any sequence programs
