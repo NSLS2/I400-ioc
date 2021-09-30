@@ -1,7 +1,7 @@
 NAME=I400
 PORT=7201
 USER=softioc
-HOST=xf07id-ioc1
+HOST=xf07id-ioc2
 
 CHDIR="$CHDIR/iocBoot/iocI400"
 EXEC="$CHDIR/st.cmd"

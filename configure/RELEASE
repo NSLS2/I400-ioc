@@ -26,7 +26,6 @@ TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
 CALC=/usr/lib/epics
 ASYN=/usr/lib/epics
 MODBUS=/usr/lib/epics
-UIOCSYSTEM=/opt/epics/modules/uIOCSystem
 
 # EPICS_BASE usually appears last so other apps can override stuff:
 # BEGIN ANSIBLE MANAGED BLOCK
@@ -34,6 +33,7 @@ UIOCSYSTEM=/opt/epics/modules/uIOCSystem
 RECCASTER=$(EPICS_BASE)
 # END ANSIBLE MANAGED BLOCK
 EPICS_BASE=/usr/lib/epics
+UIOCSYSTEM=/opt/epics/modules/uIOCSystem
 
 # Set RULES here if you want to take build rules from somewhere
 # other than EPICS_BASE:

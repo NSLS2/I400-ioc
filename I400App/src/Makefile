@@ -21,10 +21,10 @@ I400_LIBS += reccaster
 endif
 # END ANSIBLE MANAGED BLOCK
 
-${PROD_IOC}_DBD += stream.dbd
 ${PROD_IOC}_DBD += asyn.dbd
 ${PROD_IOC}_DBD += drvAsynIPPort.dbd
 ${PROD_IOC}_DBD += calcSupport.dbd
+${PROD_IOC}_DBD += stream.dbd
 #http://epics.web.psi.ch/software/streamdevice/doc/setup.html#app
 ${PROD_IOC}_DBD += I400AppInclude.dbd
 #${PROD_IOC}_DBD += uIOCSystem.dbd
