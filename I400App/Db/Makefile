@@ -13,6 +13,8 @@ include $(TOP)/configure/CONFIG
 #DB += xxx.db
 DB += I400.substitutions
 DB += I400.template
+DB += asyn.db
+
 # BEGIN ANSIBLE MANAGED BLOCK
 ifneq ($(RECCASTER),)
 DB_INSTALLS += $(RECCASTER)/db/reccaster.db

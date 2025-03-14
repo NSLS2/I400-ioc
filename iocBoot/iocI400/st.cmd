@@ -14,8 +14,9 @@ epicsEnvSet("IOC_DEV", "{IOC:i400}")
 
 cd ${TOP}
 
-## configuration for stream
-epicsEnvSet ("STREAM_PROTOCOL_PATH", ".:./I400App/src/protocol-files/")
+epicsEnvSet("ENGINEER",  "C. Engineer")
+epicsEnvSet("LOCATION", "XF09IDA")
+epicsEnvSet ("STREAM_PROTOCOL_PATH", "$(TOP)/I400App/src/protocol-files/")
 
 ## Register all support components
 dbLoadDatabase("./dbd/I400.dbd",0,0)
@@ -36,8 +37,32 @@ dbLoadTemplate("./db/I400.substitutions", "Sys=$(SYS),Dev=$(DEV)"))
 ## Run this to trace the stages of iocInit
 #traceIocInit
 
-dbLoadRecords("/epics/iocs/I400/db/reccaster.db", "P=$(IOC_SYS)$(IOC_DEV)RecSync")
+dbLoadRecords("db/asyn.db","Sys=$(SYS),Dev=$(DEV),PORT=COM1,ADDR=0")
+dbLoadRecords("$(EPICS_BASE)/db/iocAdminSoft.db","IOC=$(IOC_SYS)$(IOC_DEV)")
+dbLoadRecords("$(DEVIOCSTATS)/db/iocAdminSoft.db", "IOC=$(IOC_SYS)$(IOC_DEV)")
+dbLoadRecords("$(AUTOSAVE)/db/save_restoreStatus.db", "P=$(IOC_SYS)$(IOC_DEV)")
+dbLoadRecords("${TOP}/db/reccaster.db", "P=${IOC_SYS}$(IOC_DEV)RecSync")
+
+# autosave/restore mechanisms
+save_restoreSet_Debug(0)
+save_restoreSet_IncompleteSetsOk(1)
+save_restoreSet_DatedBackupFiles(1)
+
+set_savefile_path("${TOP}/as","/save")
+set_requestfile_path("${TOP}/as","/req")
+set_requestfile_path("${EPICS_BASE}/as","/req")
+
+set_pass0_restoreFile("info_settings.sav")
+set_pass0_restoreFile("info_positions.sav")
+set_pass1_restoreFile("info_settings.sav")
+
+makeAutosaveFileFromDbInfo("$(TOP)/as/req/info_settings.req", "autosaveFields")
+makeAutosaveFileFromDbInfo("$(TOP)/as/req/info_positions.req", "autosaveFields_pass0")
+
 iocInit()
+
+create_monitor_set("info_settings.req", 30)
+create_monitor_set("info_positions.req", 15)
 
 ###Streamdebug#################################################################
 var streamDebug 0

@@ -27,6 +27,9 @@ CALC=/usr/lib/epics
 ASYN=/usr/lib/epics
 MODBUS=/usr/lib/epics
 
+AUTOSAVE=/usr/lib/epics
+DEVIOCSTATS=/usr/lib/epics
+
 # EPICS_BASE usually appears last so other apps can override stuff:
 # BEGIN ANSIBLE MANAGED BLOCK
 # RecSync support
