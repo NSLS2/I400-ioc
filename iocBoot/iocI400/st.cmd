@@ -35,7 +35,7 @@ drvAsynIPPortConfigure("$(PORT)", "10.66.66.83:4001",0,0,0)
 #asynSetTraceIOMask("$(PORT)",0,9)
 
 ## Load record instances
-dbLoadTemplate("./db/I400.substitutions", "Sys=$(SYS),Dev=$(DEV),PORT_=$(PORT)"))
+dbLoadTemplate("./db/I400.substitutions", "Sys=$(SYS),Dev=$(DEV),Port=$(PORT)"))
 
 ## Run this to trace the stages of iocInit
 #traceIocInit

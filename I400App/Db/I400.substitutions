@@ -10,5 +10,5 @@ file "$(I400)/db/I400.template"
 #
 {
 pattern { P,		R, 		PORT,		SCANRATE_FAST,	SCANRATE_SLOW,	DEVICE,	CAP0NAME ,CAP0VAL,	CAP1NAME, CAP1VAL,CAP0_IMAX,DEVICETYPENUM}
-	{ "$(Sys)",	"$(Dev)",	"$(PORT_)",	"1 second",	"Passive",	"I400","100pF","100.0e-12",	"3300pF","3300.0e-12","8.0e-7","3" }
+	{ "$(Sys)",	"$(Dev)",	"$(Port)",	"1 second",	"Passive",	"I400","100pF","100.0e-12",	"3300pF","3300.0e-12","8.0e-7","3" }
 }
