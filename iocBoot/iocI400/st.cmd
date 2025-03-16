@@ -37,7 +37,7 @@ dbLoadTemplate("./db/I400.substitutions", "Sys=$(SYS),Dev=$(DEV)"))
 ## Run this to trace the stages of iocInit
 #traceIocInit
 
-dbLoadRecords("db/asyn.db","Sys=$(SYS),Dev=$(DEV),PORT=COM1,ADDR=0")
+dbLoadRecords("db/asyn.db","Sys=$(SYS),Dev=$(DEV),PORT=I400_1,ADDR=0")
 dbLoadRecords("$(EPICS_BASE)/db/iocAdminSoft.db","IOC=$(IOC_SYS)$(IOC_DEV)")
 dbLoadRecords("$(DEVIOCSTATS)/db/iocAdminSoft.db", "IOC=$(IOC_SYS)$(IOC_DEV)")
 dbLoadRecords("$(AUTOSAVE)/db/save_restoreStatus.db", "P=$(IOC_SYS)$(IOC_DEV)")
@@ -67,6 +67,10 @@ create_monitor_set("info_positions.req", 15)
 ###Streamdebug#################################################################
 var streamDebug 0
 ###############################################################################
+
+# Uncomment the following lines to enable printing of communication messages (for debugging)
+#dbpf("$(SYS)$(DEV)Asyn.TB3","1")
+#dbpf("$(SYS)$(DEV)Asyn.TIB1","1")
 
 dbl > $(TOP)/records.dbl
 
