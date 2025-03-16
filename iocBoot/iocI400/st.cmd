@@ -11,6 +11,9 @@ epicsEnvSet("SYS", "XF:09IDA-BI")
 epicsEnvSet("DEV", "{i400:1}")
 epicsEnvSet("IOC_SYS", "XF:09IDA-CT")
 epicsEnvSet("IOC_DEV", "{IOC:i400}")
+epicsEnvSet("PORT", "I400_1")
+
+epicsEnvSet("I400", $(TOP))
 
 cd ${TOP}
 
@@ -25,19 +28,19 @@ I400_registerRecordDeviceDriver(pdbbase)
 ##############  I404 via Moxa TCP Server  #########
 ##
 ## drvAsynIPPortConfigure(portName, hostInfo, priority, noAutoConnect, noProcessEos)
-drvAsynIPPortConfigure("I400_1", "10.66.66.83:4001",0,0,0)
+drvAsynIPPortConfigure("$(PORT)", "10.66.66.83:4001",0,0,0)
 ##
 
-#asynSetTraceMask("I400_1",0,9)
-#asynSetTraceIOMask("I400_1",0,9)
+#asynSetTraceMask("$(PORT)",0,9)
+#asynSetTraceIOMask("$(PORT)",0,9)
 
 ## Load record instances
-dbLoadTemplate("./db/I400.substitutions", "Sys=$(SYS),Dev=$(DEV)"))
+dbLoadTemplate("./db/I400.substitutions", "Sys=$(SYS),Dev=$(DEV),PORT_=$(PORT)"))
 
 ## Run this to trace the stages of iocInit
 #traceIocInit
 
-dbLoadRecords("db/asyn.db","Sys=$(SYS),Dev=$(DEV),PORT=I400_1,ADDR=0")
+dbLoadRecords("db/asyn.db","Sys=$(SYS),Dev=$(DEV),PORT=$(PORT),ADDR=0")
 dbLoadRecords("$(EPICS_BASE)/db/iocAdminSoft.db","IOC=$(IOC_SYS)$(IOC_DEV)")
 dbLoadRecords("$(DEVIOCSTATS)/db/iocAdminSoft.db", "IOC=$(IOC_SYS)$(IOC_DEV)")
 dbLoadRecords("$(AUTOSAVE)/db/save_restoreStatus.db", "P=$(IOC_SYS)$(IOC_DEV)")
