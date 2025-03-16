@@ -78,7 +78,7 @@ idn {
 	InTerminator = CR LF;
 	
 	out "*IDN?";
-	in "*IDN?",LF,"%s";
+	in "*IDN?\n\x06%s";
 #	@mismatch {
 #		in "%*c";	
 #	}

@@ -1,6 +1,6 @@
 ##
 ##
-file ./db/I400.template
+file "$(I400)/db/I400.template"
 # Macro - Description
 # DEVICE - Device name IC101,I400,I404 (protofilename)
 # PORT - Serial port name asyn
@@ -10,10 +10,5 @@ file ./db/I400.template
 #
 {
 pattern { P,		R, 		PORT,		SCANRATE_FAST,	SCANRATE_SLOW,	DEVICE,	CAP0NAME ,CAP0VAL,	CAP1NAME, CAP1VAL,CAP0_IMAX,DEVICETYPENUM}
-	{ "XF:07ID-BI",	"{DM2:I400-1}",	"I400_1",	"1 second",	"Passive",	"I400","100pF","100.0e-12",	"3300pF","3300.0e-12","8.0e-7","3" }
-	{ "XF:07ID-BI",	"{DM3:I400-1}",	"I400_2",	"1 second",	"Passive",	"I400","100pF","100.0e-12",	"3300pF","3300.0e-12","8.0e-7","3" }
-	{ "XF:07ID-BI",	"{DM4:I400-1}",	"I400_3",	"1 second",	"Passive",	"I400","100pF","100.0e-12",	"3300pF","3300.0e-12","8.0e-7","3" }
-	{ "XF:07ID-BI",	"{DM5:I400-1}",	"I400_4",	"1 second",	"Passive",	"I400","100pF","100.0e-12",	"3300pF","3300.0e-12","8.0e-7","3" }
-	{ "XF:07ID-BI",	"{DM7:I400-1}",	"I400_5",	"1 second",	"Passive",	"I400","100pF","100.0e-12",	"3300pF","3300.0e-12","8.0e-7","3" }
-	{ "XF:07ID-BI",	"{M5C:I400-1}",	"I400_6",	"1 second",	"Passive",	"I400","100pF","100.0e-12",	"3300pF","3300.0e-12","8.0e-7","3" }
+	{ "$(Sys)",	"$(Dev)",	"$(Port)",	"1 second",	"Passive",	"I400","100pF","100.0e-12",	"3300pF","3300.0e-12","8.0e-7","3" }
 }

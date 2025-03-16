@@ -25,6 +25,9 @@ ${PROD_IOC}_DBD += asyn.dbd
 ${PROD_IOC}_DBD += drvAsynIPPort.dbd
 ${PROD_IOC}_DBD += calcSupport.dbd
 ${PROD_IOC}_DBD += stream.dbd
+${PROD_IOC}_DBD += asSupport.dbd
+${PROD_IOC}_DBD += devIocStats.dbd
+
 #http://epics.web.psi.ch/software/streamdevice/doc/setup.html#app
 ${PROD_IOC}_DBD += I400AppInclude.dbd
 #${PROD_IOC}_DBD += uIOCSystem.dbd
@@ -38,6 +41,8 @@ ${PROD_IOC}_DBD += I400AppInclude.dbd
 ${PROD_IOC}_LIBS += calc
 ${PROD_IOC}_LIBS += stream
 ${PROD_IOC}_LIBS += asyn
+${PROD_IOC}_LIBS += autosave
+${PROD_IOC}_LIBS += devIocStats
 #${PROD_IOC}_LIBS += uIOCSystem
 ${PROD_IOC}_LIBS += ${EPICS_BASE_IOC_LIBS}
 
